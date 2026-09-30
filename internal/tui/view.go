@@ -34,9 +34,6 @@ func (m *Model) View() tea.View {
 func (m *Model) render() string {
 	if m.width < 54 || m.height < 16 {
 		message := "Instagram Scraper\nResize to 54 × 16 or larger.\nq quit"
-		if m.demo {
-			message += "\nREAL DATA · SAVED SNAPSHOT"
-		}
 		return fitFrame(message, m.width, m.height)
 	}
 	width := m.width - 4
@@ -48,19 +45,13 @@ func (m *Model) render() string {
 		content = helpView(width)
 	}
 	status := m.status(width)
-	frame := m.header(width) + "\n" + status + "\n" + dimStyle.Render(strings.Repeat("─", width)) + "\n" +
+	frame := m.header() + "\n" + status + "\n" + dimStyle.Render(strings.Repeat("─", width)) + "\n" +
 		fitFrame(content, width, m.height-9) + "\n" + dimStyle.Render(strings.Repeat("─", width)) + "\n" + m.footer(width)
 	return fitFrame(lipgloss.NewStyle().Padding(1, 2).Render(frame), m.width, m.height)
 }
 
-func (m *Model) header(width int) string {
-	title := strongStyle.Render("◈  INSTAGRAM ") + accentStyle.Bold(true).Render("SCRAPER")
-	mode := goodStyle.Render("LOCAL SNAPSHOTS")
-	if m.demo {
-		mode = accentStyle.Render("REAL DATA · SAVED SNAPSHOT")
-	}
-	gap := max(1, width-ansi.StringWidth(title)-ansi.StringWidth(mode))
-	return title + strings.Repeat(" ", gap) + mode
+func (m *Model) header() string {
+	return strongStyle.Render("◈  INSTAGRAM ") + accentStyle.Bold(true).Render("SCRAPER")
 }
 
 func (m *Model) status(width int) string {
@@ -71,19 +62,19 @@ func (m *Model) status(width int) string {
 		return accentStyle.Render(clipped(m.previewNote, width))
 	}
 	filter := []string{"all profiles", "measured", "unmeasured", "public"}[m.filter]
-	order := []string{"handle", "followers", "latest snapshot"}[m.sort]
-	label := fmt.Sprintf("%02d %s  /  %s  /  sort: %s", len(m.visible), plural(len(m.visible), "snapshot"), filter, order)
+	order := []string{"handle", "followers", "latest"}[m.sort]
+	label := fmt.Sprintf("%02d %s  /  %s  /  sort: %s", len(m.visible), plural(len(m.visible), "profile"), filter, order)
 	if m.query != "" {
 		label += "  /  \"" + m.query + "\""
 	}
 	if m.detail {
-		label = "PROFILE / @" + m.current().Profile.Username + "  ·  saved raw metrics"
+		label = "@" + m.current().Profile.Username
 		if len(m.current().Reels) > 0 {
 			label += fmt.Sprintf("  ·  reel %d/%d", m.reel+1, len(m.current().Reels))
 		}
 	}
 	if m.help {
-		label = "KEYBOARD / a local, read-only workspace"
+		label = "KEYBOARD"
 	}
 	return dimStyle.Render(clipped(label, width))
 }
@@ -101,7 +92,7 @@ func (m *Model) footer(width int) string {
 
 func (m *Model) catalog(width int) string {
 	if len(m.visible) == 0 {
-		return strongStyle.Render("No matching snapshots") + "\n\n" + dimStyle.Render("Press c to clear search and filters.")
+		return strongStyle.Render("No matching profiles") + "\n\n" + dimStyle.Render("c  clear filters")
 	}
 	if width < 86 {
 		return m.profileList(width, m.height-9)
@@ -115,7 +106,7 @@ func (m *Model) catalog(width int) string {
 }
 
 func (m *Model) profileList(width, height int) string {
-	rows := []string{dimStyle.Render("SAVED PROFILES"), ""}
+	rows := []string{dimStyle.Render("PROFILES"), ""}
 	pageSize := max(1, (height-3)/3)
 	start := (m.selected / pageSize) * pageSize
 	end := min(len(m.visible), start+pageSize)
@@ -129,9 +120,6 @@ func (m *Model) profileList(width, height int) string {
 		}
 		rows = append(rows, style.Render(clipped(prefix+"@"+item.Profile.Username, width)))
 		label := "  " + number(item.Profile.Followers) + " followers"
-		if item.Profile.Followers == nil {
-			label = "  followers unavailable"
-		}
 		rows = append(rows, dimStyle.Render(clipped(label, width)), "")
 	}
 	if end < len(m.visible) || start > 0 {
@@ -149,15 +137,10 @@ func (m *Model) summary(item *snapshot.Snapshot, width, height int) string {
 	lines := []string{strongStyle.Render(clipped(name, width)), accentStyle.Render("@" + profile.Username), ""}
 	lines = append(lines, dimStyle.Render(clipped(privacy(profile.IsPrivate)+category(profile.Category), width)), "")
 	lines = append(lines, metric("FOLLOWERS", profile.Followers, width), metric("FOLLOWING", profile.Following, width), metric("POSTS", profile.MediaCount, width), "")
-	lines = append(lines, wrap(profile.Biography, width, 3), "", dimStyle.Render("SAVED EVIDENCE"))
-	lines = append(lines, textStyle.Render(measured(item)), dimStyle.Render(coverage(item)))
+	lines = append(lines, wrap(profile.Biography, width, 3), "", dimStyle.Render(captureSummary(item)))
 	if len(item.Reels) > 0 && height >= 22 {
-		lines = append(lines, "", dimStyle.Render("TOP SAVED REEL"), goodStyle.Bold(true).Render(number(item.Reels[0].Plays)+" plays"),
+		lines = append(lines, "", dimStyle.Render("REEL"), goodStyle.Bold(true).Render(number(item.Reels[0].Plays)+" plays"),
 			dimStyle.Render(clipped(item.Reels[0].Caption, width)))
-	}
-	lines = append(lines, "", accentStyle.Render("enter  →  profile & reel metrics"))
-	if profile.AvatarPath != "" {
-		lines = append(lines, accentStyle.Render("i  →  profile picture in Kitty"))
 	}
 	return fitFrame(strings.Join(lines, "\n"), width, height)
 }
@@ -186,20 +169,24 @@ func category(value string) string {
 
 func measured(item *snapshot.Snapshot) string {
 	if item.Measurement().IsZero() {
-		return "Measurement time unavailable"
+		return "Captured —"
 	}
-	return "Measured " + item.Measurement().Format("02 Jan 2006 15:04 UTC")
+	return "Captured " + item.Measurement().Format("02 Jan 2006 15:04 UTC")
 }
 
 func coverage(item *snapshot.Snapshot) string {
-	status := "feed coverage unknown"
+	status := "coverage —"
 	if item.FeedComplete != nil {
 		status = "partial feed"
 		if *item.FeedComplete {
-			status = "complete accessible feed"
+			status = "complete feed"
 		}
 	}
-	return fmt.Sprintf("%d saved %s · %s", len(item.Reels), plural(len(item.Reels), "reel"), status)
+	return status
+}
+
+func captureSummary(item *snapshot.Snapshot) string {
+	return measured(item) + " · " + coverage(item)
 }
 
 func plural(count int, noun string) string {
@@ -238,29 +225,21 @@ func fitFrame(value string, width, height int) string {
 }
 
 func helpView(width int) string {
-	text := `A small, offline workspace for saved profile and reel data.
-
-NAVIGATE                  EXPLORE
+	text := `NAVIGATE                  EXPLORE
 ↑ ↓ / j k  Select         /       Search handles, names, category
 enter      Open profile   f       All / measured / unmeasured / public
 esc        Back           s       Handle / followers / latest
 [ ]        Next profile   c       Clear search and filters
-g / G      First / last   ?       Toggle this keyboard guide
-q          Quit           ctrl+c  Quit immediately
+g / G      First / last   ?       Help
+q          Quit           ctrl+c  Quit
 
-KITTY IMAGES
-i          Saved avatar   n / p   Select next / previous reel
+IMAGES
+i          Profile picture  n / p  Next / previous reel
 t          Reel thumbnail          (in profile details)
-Enter or Esc closes the native image preview and restores this screen.
-Only local cached images are read; missing images stay unavailable.
+Enter / Esc to return. Requires Kitty.
 
-Profile details scroll with ↑ ↓, j k, Page Up, Page Down.
-
-DATA NOTES
-— means unavailable, never zero. Plays, views, likes, comments,
-reshares, and reposts are separate API-reported counters.
-Timestamps are displayed in UTC. Feed coverage is explicit.
-No scores, demographic guesses, hidden fetches, or network calls.`
+Scroll details with ↑ ↓, j k, Page Up, Page Down.
+— unavailable`
 	return textStyle.Render(ansi.Hardwrap(text, width, true))
 }
 

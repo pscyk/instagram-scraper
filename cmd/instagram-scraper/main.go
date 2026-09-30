@@ -50,7 +50,7 @@ func parseOptions(args []string, output io.Writer) (options, error) {
 	settings := options{}
 	flags := flag.NewFlagSet("instagram-scraper", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
-	flags.BoolVar(&settings.demo, "demo", false, "use embedded saved public-data snapshots")
+	flags.BoolVar(&settings.demo, "demo", false, "open the example profile")
 	flags.BoolVar(&settings.json, "json", false, "print loaded snapshots as JSON")
 	flags.StringVar(&settings.path, "input", "", "snapshot file or directory")
 	if err := flags.Parse(args); err != nil {
@@ -95,34 +95,29 @@ func execute(ctx context.Context, settings options, output io.Writer) error {
 	if !term.IsTerminal(os.Stdin.Fd()) || !term.IsTerminal(os.Stdout.Fd()) {
 		return errors.New("interactive mode requires a terminal; use --json for scripts")
 	}
-	_, err = tea.NewProgram(tui.New(items, settings.demo).WithContext(ctx), tea.WithContext(ctx), tea.WithOutput(output)).Run()
+	_, err = tea.NewProgram(tui.New(items).WithContext(ctx), tea.WithContext(ctx), tea.WithOutput(output)).Run()
 	if errors.Is(err, tea.ErrProgramKilled) && ctx.Err() != nil {
 		return nil
 	}
 	return err
 }
 
-const help = `Instagram Scraper — offline browser for saved raw profile and reel data
+const help = `Instagram Scraper
 
 Usage:
   instagram-scraper --demo
   instagram-scraper results/
-  instagram-scraper results/profile.json
   instagram-scraper --input results/
   instagram-scraper --json results/
-  instagram-scraper --demo --json
 
-Reads the JSON snapshots produced by lookup.py. The terminal viewer never
-contacts Instagram, reads cookies, or starts scraping. No backend is needed.
---demo uses an embedded real public-data snapshot. It does not refresh online.
---json emits an array of loaded snapshots; missing counters remain null.
+Options:
+  --demo        Open the example profile
+  --input PATH  JSON file or directory from lookup.py
+  --json        Print JSON
+  --help        Show help
 
 Keys: ↑↓/jk select, enter profile, / search, f filter, s sort, c clear,
-[ ] adjacent profile, esc back, ? help, q quit. Details scroll with ↑↓/jk.
-Images: i saved avatar; in details, n/p select a reel, t saved thumbnail.
-Kitty with its kitten helper is required for image previews. Enter or Esc closes
-the preview. Images are local JPEG/PNG files; the viewer never fetches URLs.
-
-Input limits: 128 JSON files, 8 MiB each, 32 MiB total, 10000 reels per file.
-Directories are non-recursive. Symlinks are refused. No files are modified.
+[ ] adjacent profile, esc back, ? help, q quit.
+Images: i picture, n/p reel, t thumbnail. Requires Kitty and kitten.
+Enter / Esc to return from an image.
 `

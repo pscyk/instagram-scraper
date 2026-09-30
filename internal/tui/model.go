@@ -19,7 +19,7 @@ type Model struct {
 	input                                 textinput.Model
 	viewport                              viewport.Model
 	width, height, selected, filter, sort int
-	detail, help, demo                    bool
+	detail, help                          bool
 	query                                 string
 	ctx                                   context.Context
 	reel                                  int
@@ -28,15 +28,15 @@ type Model struct {
 	previewGeneration                     uint64
 }
 
-// New prepares the local catalog. demo labels every screen as a recorded real-data snapshot.
-func New(items []snapshot.Snapshot, demo bool) *Model {
+// New prepares the profile catalog.
+func New(items []snapshot.Snapshot) *Model {
 	input := textinput.New()
 	input.Prompt = "/ "
 	input.Placeholder = "Search handles, names, or category"
 	input.CharLimit = 100
 	input.SetVirtualCursor(true)
 	model := &Model{items: items, input: input, viewport: viewport.New(),
-		width: 100, height: 32, demo: demo, ctx: context.Background()}
+		width: 100, height: 32, ctx: context.Background()}
 	model.applyFilters()
 	return model
 }
@@ -54,7 +54,7 @@ func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	case imageReadyMsg:
 		return m, m.imageReady(message)
 	case previewDoneMsg:
-		m.previewNote = "Image preview closed. Saved data is unchanged."
+		m.previewNote = ""
 		if message.err != nil {
 			m.previewNote = message.err.Error()
 		}

@@ -13,7 +13,7 @@ import (
 
 func demoModel(t *testing.T) *Model {
 	t.Helper()
-	return New(unitSnapshots(), true)
+	return New(unitSnapshots())
 }
 
 // UI behavior fixtures stay in tests, independent of the user-visible saved demo.
@@ -37,14 +37,14 @@ func key(code rune) tea.KeyPressMsg { return tea.KeyPressMsg{Code: code} }
 
 func TestEmptyFilterFromDetailDoesNotPanic(t *testing.T) {
 	items := unitSnapshots()
-	m := New(items[:1], true)
+	m := New(items[:1])
 	m.detail = true
 	m.filter = 2
 	m.applyFilters()
 	if m.detail {
 		t.Fatal("empty selection remained in detail mode")
 	}
-	if !strings.Contains(ansi.Strip(m.render()), "No matching snapshots") {
+	if !strings.Contains(ansi.Strip(m.render()), "No matching profiles") {
 		t.Fatal("missing empty state")
 	}
 }
@@ -70,7 +70,7 @@ func TestSearchAndFiltersPreserveUnknown(t *testing.T) {
 	}
 }
 
-func TestRenderBoundsAndSavedDataLabel(t *testing.T) {
+func TestRenderBoundsAndProfileIdentity(t *testing.T) {
 	for _, size := range [][2]int{{120, 38}, {90, 26}, {54, 16}, {40, 10}, {1, 1}} {
 		m := demoModel(t)
 		m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
@@ -87,8 +87,13 @@ func TestRenderBoundsAndSavedDataLabel(t *testing.T) {
 					t.Fatalf("%v: line exceeds width", size)
 				}
 			}
-			if size[0] >= 54 && !strings.Contains(ansi.Strip(rendered), "REAL DATA") {
-				t.Fatal("demo label absent")
+			if size[0] >= 54 && !strings.Contains(ansi.Strip(rendered), "INSTAGRAM SCRAPER") {
+				t.Fatal("app name absent")
+			}
+			for _, obsolete := range []string{"REAL DATA", "SAVED SNAPSHOT", "OFFLINE", "RAW COUNTERS", "Source:", "no inferred metrics"} {
+				if strings.Contains(ansi.Strip(rendered), obsolete) {
+					t.Fatalf("obsolete product copy remains: %s", obsolete)
+				}
 			}
 		}
 	}
