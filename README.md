@@ -7,9 +7,9 @@ Go terminal viewer lets you search those saved snapshots, inspect profiles, and
 browse reels offline. There is no AI analysis, scoring, or inferred demographics.
 No backend, database, AI key, or Instagram developer API key is needed.
 
-[![Kitty demo of the saved @circletoonsig profile and DdwMTTuMNnE post](docs/demo.gif)](https://github.com/pscyk/instagram-scraper/raw/refs/heads/main/docs/demo.mp4)
+[![Kitty demo of the saved @circletoonsig profile and DdwMTTuMNnE post](docs/demo.gif)](docs/demo.mp4?raw=1)
 
-[Watch the demo](https://github.com/pscyk/instagram-scraper/raw/refs/heads/main/docs/demo.mp4)
+[Watch the demo](docs/demo.mp4?raw=1)
 · [Recording instructions](docs/DEMO.md)
 
 *The demo shows a saved public snapshot of [@circletoonsig](https://www.instagram.com/circletoonsig/)
