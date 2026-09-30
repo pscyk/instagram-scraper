@@ -22,7 +22,7 @@ func TestNonKittyKeepsSavedTextUsable(t *testing.T) {
 	if !strings.Contains(m.previewNote, "require Kitty") {
 		t.Fatal(m.previewNote)
 	}
-	if !strings.Contains(ansi.Strip(m.render()), "SAVED PROFILES") {
+	if !strings.Contains(ansi.Strip(m.render()), "PROFILES") {
 		t.Fatal("saved list disappeared")
 	}
 }
@@ -43,6 +43,11 @@ func TestReelSelectionAndStaleImageResult(t *testing.T) {
 	m.Update(tea.KeyPressMsg{Code: '/'})
 	if m.imageReady(imageReadyMsg{generation: generation}) != nil {
 		t.Fatal("stale preview opened during search")
+	}
+	m.previewNote = "Opening image…"
+	m.Update(previewDoneMsg{})
+	if m.previewNote != "" {
+		t.Fatal("successful image close left a status message")
 	}
 }
 
@@ -67,7 +72,7 @@ func TestPreviewFailureRestoresOnlyItsScreenAndImage(t *testing.T) {
 	t.Setenv("TMPDIR", directory)
 	var output bytes.Buffer
 	command := imageCommand{ctx: context.Background(), binary: filepath.Join(directory, "missing-kitten"),
-		data: []byte("synthetic test bytes"), width: 120, height: 38, title: "DEMO", demo: true, output: &output}
+		data: []byte("synthetic test bytes"), width: 120, height: 38, title: "PROFILE PICTURE", output: &output}
 	if err := command.Run(); err == nil {
 		t.Fatal("missing helper reported success")
 	}
@@ -75,11 +80,16 @@ func TestPreviewFailureRestoresOnlyItsScreenAndImage(t *testing.T) {
 	if !strings.Contains(text, "\x1b[?1049h") || !strings.HasSuffix(text, "\x1b[?1049l") || !strings.Contains(text, "a=d,d=I,i=") {
 		t.Fatal("preview did not restore screen and delete its own graphics")
 	}
-	if !strings.Contains(ansi.Strip(text), "REAL DATA · SAVED SNAPSHOT") {
-		t.Fatal("saved-data image preview not labeled")
+	if !strings.Contains(ansi.Strip(text), "PROFILE PICTURE") {
+		t.Fatal("image preview identity missing")
 	}
-	if !strings.Contains(ansi.Strip(text), "Press Enter or Esc to return to saved metrics.") {
-		t.Fatal("preview close instructions do not match kitten's hold behavior")
+	if strings.Contains(ansi.Strip(text), "Enter / Esc to return") {
+		t.Fatal("app frame duplicates the native image helper's return prompt")
+	}
+	for _, obsolete := range []string{"REAL DATA", "SAVED SNAPSHOT", "OFFLINE", "LOCAL CACHED"} {
+		if strings.Contains(ansi.Strip(text), obsolete) {
+			t.Fatalf("obsolete image banner remains: %s", obsolete)
+		}
 	}
 	files, err := os.ReadDir(directory)
 	if err != nil || len(files) != 0 {

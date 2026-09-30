@@ -30,14 +30,14 @@ func (m *Model) previewImage(thumbnail bool) tea.Cmd {
 	relative, title := item.Profile.AvatarPath, "@"+item.Profile.Username+" / PROFILE PICTURE"
 	if thumbnail {
 		if !m.detail || len(item.Reels) == 0 {
-			m.previewNote = "Open a profile with saved reels before previewing a thumbnail."
+			m.previewNote = "Open a profile to preview its reels."
 			return nil
 		}
 		relative = item.Reels[m.reel].ThumbnailPath
 		title = fmt.Sprintf("@%s / REEL %02d THUMBNAIL", item.Profile.Username, m.reel+1)
 	}
 	if relative == "" {
-		m.previewNote = "No cached image for this selection. Collect with --download-images first."
+		m.previewNote = "Image unavailable. Collect with --download-images."
 		return nil
 	}
 	binary, err := kittyBinary()
@@ -47,7 +47,7 @@ func (m *Model) previewImage(thumbnail bool) tea.Cmd {
 	}
 	m.previewGeneration++
 	generation, saved := m.previewGeneration, *item
-	m.previewNote = "Opening local image in Kitty…"
+	m.previewNote = "Opening image…"
 	return func() tea.Msg {
 		data, err := saved.ImagePNG(relative)
 		return imageReadyMsg{generation: generation, data: data, binary: binary, title: title, err: err}
@@ -62,15 +62,15 @@ func (m *Model) imageReady(message imageReadyMsg) tea.Cmd {
 		m.previewNote = message.err.Error()
 		return nil
 	}
-	m.previewNote = "Image preview closed. Saved data is unchanged."
+	m.previewNote = ""
 	return tea.Exec(&imageCommand{ctx: m.ctx, binary: message.binary, data: message.data,
-		title: message.title, width: m.width, height: m.height, demo: m.demo},
+		title: message.title, width: m.width, height: m.height},
 		func(err error) tea.Msg { return previewDoneMsg{err: err} })
 }
 
 func kittyBinary() (string, error) {
 	if os.Getenv("TERM") != "xterm-kitty" {
-		return "", errors.New("Images require Kitty; saved profile and reel text remains available.")
+		return "", errors.New("Image previews require Kitty.")
 	}
 	if binary, err := exec.LookPath("kitten"); err == nil {
 		return binary, nil
@@ -79,7 +79,7 @@ func kittyBinary() (string, error) {
 	if info, err := os.Stat(macBinary); err == nil && info.Mode().IsRegular() {
 		return macBinary, nil
 	}
-	return "", errors.New("Kitty's kitten command is unavailable; saved text remains available.")
+	return "", errors.New("Kitty's kitten command was not found.")
 }
 
 // imageCommand owns terminal I/O only after Bubble Tea releases the terminal.
@@ -89,7 +89,6 @@ type imageCommand struct {
 	binary, title string
 	data          []byte
 	width, height int
-	demo          bool
 	input         io.Reader
 	output        io.Writer
 }
@@ -122,7 +121,7 @@ func (c *imageCommand) Run() error {
 	command := exec.CommandContext(ctx, c.binary, c.arguments(file.Name(), id)...)
 	command.Stdin, command.Stdout, command.Stderr = c.input, c.output, io.Discard
 	if command.Run() != nil {
-		return errors.New("Kitty image preview unavailable; saved text remains available.")
+		return errors.New("Could not open the image in Kitty.")
 	}
 	return nil
 }
@@ -135,10 +134,5 @@ func (c *imageCommand) arguments(filename string, id uint32) []string {
 }
 
 func (c *imageCommand) frame() string {
-	label := "LOCAL CACHED IMAGE · OFFLINE"
-	if c.demo {
-		label = "REAL DATA · SAVED SNAPSHOT · OFFLINE"
-	}
-	return "\x1b[?1049h\x1b[2J\x1b[H\n  " + strongStyle.Render(clipped(c.title, max(1, c.width-4))) +
-		"\n  " + accentStyle.Render(label) + "\n  " + dimStyle.Render("Press Enter or Esc to return to saved metrics.")
+	return "\x1b[?1049h\x1b[2J\x1b[H\n  " + strongStyle.Render(clipped(c.title, max(1, c.width-4)))
 }
