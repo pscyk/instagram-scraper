@@ -1,0 +1,13 @@
+.secrets/
+results/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+bin/
+/instagram-scraper
+*.test
+coverage.out

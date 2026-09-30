@@ -1,0 +1,23 @@
+{
+  "measured_at_utc": "2026-09-21T12:35:00+00:00",
+  "profile": {
+    "pk": "800005",
+    "username": "demo_private",
+    "full_name": "Private Example",
+    "biography": "Synthetic private profile. No post metrics are available.",
+    "external_url": "",
+    "follower_count": 1260,
+    "following_count": 310,
+    "media_count": 38,
+    "is_private": true,
+    "is_verified": false,
+    "category": "",
+    "avatar_path": "assets/avatar-private.png"
+  },
+  "feed_complete": null,
+  "posts_scanned": null,
+  "reels_checked": null,
+  "ranking_metric": "play_count",
+  "reels_missing_play_count": null,
+  "ranked_reels": []
+}
