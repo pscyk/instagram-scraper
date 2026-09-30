@@ -170,7 +170,7 @@ func validateCounts(item *Snapshot) error {
 	return nil
 }
 
-// Demo returns fictional, embedded snapshots and performs no filesystem or network lookup.
+// Demo returns embedded public-data snapshots without a filesystem or network lookup.
 func Demo() ([]Snapshot, error) {
 	entries, err := demoFiles.ReadDir("demo")
 	if err != nil {
@@ -189,7 +189,7 @@ func Demo() ([]Snapshot, error) {
 		if err != nil {
 			return nil, err
 		}
-		item.Source = "synthetic demo / " + entry.Name()
+		item.Source = "saved demo snapshot / " + entry.Name()
 		item.demo = true
 		result = append(result, item)
 	}

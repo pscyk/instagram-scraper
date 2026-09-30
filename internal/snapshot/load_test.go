@@ -80,7 +80,7 @@ func TestLoadRefusesOversizedFiles(t *testing.T) {
 	}
 }
 
-func TestDemoIsDeterministicSyntheticAndOffline(t *testing.T) {
+func TestDemoIsDeterministicSavedDataAndOffline(t *testing.T) {
 	first, err := Demo()
 	if err != nil {
 		t.Fatal(err)
@@ -91,21 +91,25 @@ func TestDemoIsDeterministicSyntheticAndOffline(t *testing.T) {
 	}
 	left, _ := json.Marshal(first)
 	right, _ := json.Marshal(second)
-	if string(left) != string(right) || len(first) < 4 {
+	if string(left) != string(right) || len(first) == 0 {
 		t.Fatal("demo is not deterministic")
 	}
+	foundRequestedPost := false
 	for _, item := range first {
-		if !strings.HasPrefix(item.Profile.Username, "demo_") || !strings.HasPrefix(item.Source, "synthetic demo") {
-			t.Fatal("demo identity is not labeled synthetic")
+		if strings.HasPrefix(item.Profile.Username, "demo_") || !strings.HasPrefix(item.Source, "saved demo snapshot / ") {
+			t.Fatal("demo must contain the recorded public profile, with saved-data provenance")
 		}
-		if item.Profile.ExternalURL != "" {
-			t.Fatal("demo contains real external URL")
+		if item.Measurement().IsZero() {
+			t.Fatal("saved demo measurement time is missing")
 		}
 		for _, reel := range item.Reels {
-			if reel.URL != "" {
-				t.Fatal("demo contains real reel URL")
+			if reel.Code == "DdwMTTuMNnE" {
+				foundRequestedPost = true
 			}
 		}
+	}
+	if !foundRequestedPost {
+		t.Fatal("saved demo does not include the requested Instagram post")
 	}
 }
 

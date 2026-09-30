@@ -7,13 +7,15 @@ Go terminal viewer lets you search those saved snapshots, inspect profiles, and
 browse reels offline. There is no AI analysis, scoring, or inferred demographics.
 No backend, database, AI key, or Instagram developer API key is needed.
 
-[![Terminal demo with fictional profiles and synthetic counters](docs/demo.gif)](https://github.com/pscyk/instagram-scraper/raw/refs/heads/main/docs/demo.mp4)
+[![Kitty demo of the saved @circletoonsig profile and DdwMTTuMNnE post](docs/demo.gif)](https://github.com/pscyk/instagram-scraper/raw/refs/heads/main/docs/demo.mp4)
 
 [Watch the demo](https://github.com/pscyk/instagram-scraper/raw/refs/heads/main/docs/demo.mp4)
 · [Recording instructions](docs/DEMO.md)
 
-*The demo uses fictional profiles, synthetic counters, and demo artwork. You can
-try it without an Instagram account or session capture.*
+*The demo shows a saved public snapshot of [@circletoonsig](https://www.instagram.com/circletoonsig/)
+and [this post](https://www.instagram.com/p/DdwMTTuMNnE/), including its avatar
+and post thumbnail. Counts are observations from the saved timestamp, not live
+totals. You can explore the snapshot without an Instagram account or capture.*
 
 ## 1. Install and try the offline demo
 
@@ -54,8 +56,12 @@ go build -o bin/instagram-scraper ./cmd/instagram-scraper
 ./bin/instagram-scraper --demo
 ```
 
-Use the arrow keys to select a profile, then press **Enter** to inspect it.
-Press **?** for help and **q** to quit. The demo makes no Instagram requests.
+Press **Enter** to inspect the saved `@circletoonsig` profile and its one
+included post. In Kitty, press **i** for the avatar and **t** for the post
+thumbnail; close each picture with **Enter or Esc**. Press **?** for help and
+**q** to quit. The demo makes no Instagram requests and does not refresh counts.
+Its `measured_at_utc` value records the observation time; use `--demo --json`
+to inspect the saved data. One selected post does not represent the full feed.
 
 ## 2. Prepare your own session capture
 
@@ -97,7 +103,7 @@ instagram-scraper/
 ├── results/
 │   ├── example.json        # Saved raw data; stays local
 │   └── example.media/     # Optional downloaded pictures
-└── ...                    # Public program source and fictional demo assets
+└── ...                    # Public program source and attributed demo assets
 ```
 
 Do not put your Instagram password in this project or create an `.env` file for
@@ -249,10 +255,13 @@ go vet ./...
 go build ./cmd/instagram-scraper
 ```
 
-Tests use synthetic fixtures and make no Instagram requests. The viewer uses
-[Charm](https://charm.land/)'s Bubble Tea, Bubbles, and Lip Gloss. Demo recording
+Tests use local fixtures, including synthetic cases and the bundled snapshot,
+and make no Instagram requests. The viewer uses [Charm](https://charm.land/)'s Bubble Tea, Bubbles, and Lip Gloss. Demo recording
 instructions are in [docs/DEMO.md](docs/DEMO.md).
 
 ## License
 
-[MIT](LICENSE).
+The source code is [MIT licensed](LICENSE). The public demo includes material
+from [@circletoonsig](https://www.instagram.com/circletoonsig/); Instagram images
+and post content remain the material of their respective owners and are not
+relicensed under MIT. See [demo attribution](docs/ATTRIBUTION.md).

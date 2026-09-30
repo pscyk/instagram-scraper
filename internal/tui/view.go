@@ -35,7 +35,7 @@ func (m *Model) render() string {
 	if m.width < 54 || m.height < 16 {
 		message := "Instagram Scraper\nResize to 54 × 16 or larger.\nq quit"
 		if m.demo {
-			message += "\nSYNTHETIC DEMO · OFFLINE"
+			message += "\nREAL DATA · SAVED SNAPSHOT"
 		}
 		return fitFrame(message, m.width, m.height)
 	}
@@ -57,7 +57,7 @@ func (m *Model) header(width int) string {
 	title := strongStyle.Render("◈  INSTAGRAM ") + accentStyle.Bold(true).Render("SCRAPER")
 	mode := goodStyle.Render("LOCAL SNAPSHOTS")
 	if m.demo {
-		mode = accentStyle.Render("SYNTHETIC DEMO · OFFLINE")
+		mode = accentStyle.Render("REAL DATA · SAVED SNAPSHOT")
 	}
 	gap := max(1, width-ansi.StringWidth(title)-ansi.StringWidth(mode))
 	return title + strings.Repeat(" ", gap) + mode
@@ -72,7 +72,7 @@ func (m *Model) status(width int) string {
 	}
 	filter := []string{"all profiles", "measured", "unmeasured", "public"}[m.filter]
 	order := []string{"handle", "followers", "latest snapshot"}[m.sort]
-	label := fmt.Sprintf("%02d snapshots  /  %s  /  sort: %s", len(m.visible), filter, order)
+	label := fmt.Sprintf("%02d %s  /  %s  /  sort: %s", len(m.visible), plural(len(m.visible), "snapshot"), filter, order)
 	if m.query != "" {
 		label += "  /  \"" + m.query + "\""
 	}
@@ -199,7 +199,14 @@ func coverage(item *snapshot.Snapshot) string {
 			status = "complete accessible feed"
 		}
 	}
-	return fmt.Sprintf("%d saved reels · %s", len(item.Reels), status)
+	return fmt.Sprintf("%d saved %s · %s", len(item.Reels), plural(len(item.Reels), "reel"), status)
+}
+
+func plural(count int, noun string) string {
+	if count == 1 {
+		return noun
+	}
+	return noun + "s"
 }
 
 func wrap(value string, width, lines int) string {

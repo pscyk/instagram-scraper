@@ -1,0 +1,43 @@
+{
+  "measured_at_utc": "2026-09-30T11:54:31.611Z",
+  "profile": {
+    "pk": "2161854048",
+    "username": "circletoonsig",
+    "full_name": "CircleToonsHD",
+    "biography": "I make dumb animations, and created Fool's Blade!!",
+    "external_url": null,
+    "follower_count": 318148,
+    "following_count": 924,
+    "media_count": null,
+    "is_private": false,
+    "is_verified": true,
+    "category": null,
+    "avatar_path": "assets/circletoonsig-avatar.png"
+  },
+  "feed_complete": false,
+  "posts_scanned": 1,
+  "reels_checked": 1,
+  "ranking_metric": "play_count",
+  "reels_missing_play_count": 1,
+  "ranked_reels": [
+    {
+      "pk": "3994746972881869252",
+      "code": "DdwMTTuMNnE",
+      "taken_at": 1790431038,
+      "play_count": null,
+      "ig_play_count": null,
+      "fb_play_count": null,
+      "view_count": null,
+      "like_count": 325558,
+      "comment_count": 1722,
+      "reshare_count": null,
+      "media_repost_count": null,
+      "premium_reaction_count": null,
+      "video_duration": null,
+      "caption": "How it feels to play a AAA game now...\n.\n.\n.\n.\n.\n#gaming #animation #funny",
+      "url": "https://www.instagram.com/reel/DdwMTTuMNnE/",
+      "published_at_utc": "2026-09-26T13:57:18+00:00",
+      "thumbnail_path": "assets/DdwMTTuMNnE-thumbnail.png"
+    }
+  ]
+}

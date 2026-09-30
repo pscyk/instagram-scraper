@@ -75,8 +75,8 @@ func TestPreviewFailureRestoresOnlyItsScreenAndImage(t *testing.T) {
 	if !strings.Contains(text, "\x1b[?1049h") || !strings.HasSuffix(text, "\x1b[?1049l") || !strings.Contains(text, "a=d,d=I,i=") {
 		t.Fatal("preview did not restore screen and delete its own graphics")
 	}
-	if !strings.Contains(ansi.Strip(text), "SYNTHETIC DEMO") {
-		t.Fatal("synthetic image preview not labeled")
+	if !strings.Contains(ansi.Strip(text), "REAL DATA · SAVED SNAPSHOT") {
+		t.Fatal("saved-data image preview not labeled")
 	}
 	if !strings.Contains(ansi.Strip(text), "Press Enter or Esc to return to saved metrics.") {
 		t.Fatal("preview close instructions do not match kitten's hold behavior")

@@ -50,7 +50,7 @@ func parseOptions(args []string, output io.Writer) (options, error) {
 	settings := options{}
 	flags := flag.NewFlagSet("instagram-scraper", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
-	flags.BoolVar(&settings.demo, "demo", false, "use embedded synthetic snapshots")
+	flags.BoolVar(&settings.demo, "demo", false, "use embedded saved public-data snapshots")
 	flags.BoolVar(&settings.json, "json", false, "print loaded snapshots as JSON")
 	flags.StringVar(&settings.path, "input", "", "snapshot file or directory")
 	if err := flags.Parse(args); err != nil {
@@ -114,7 +114,7 @@ Usage:
 
 Reads the JSON snapshots produced by lookup.py. The terminal viewer never
 contacts Instagram, reads cookies, or starts scraping. No backend is needed.
---demo uses embedded fictional data, clearly labeled SYNTHETIC DEMO.
+--demo uses an embedded real public-data snapshot. It does not refresh online.
 --json emits an array of loaded snapshots; missing counters remain null.
 
 Keys: ↑↓/jk select, enter profile, / search, f filter, s sort, c clear,
