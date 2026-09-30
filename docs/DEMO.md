@@ -1,15 +1,21 @@
-# Record the Kitty graphics demo
+# Record the real-profile Kitty demo
 
-The README video records the real application in a native Kitty window on
-Wayland. Profile pictures and reel thumbnails use Kitty's graphics protocol.
-A plain terminal emulator or text-only recorder cannot reproduce those pixels.
+The README demo shows a saved public snapshot of
+[@circletoonsig](https://www.instagram.com/circletoonsig/) and the selected
+[Instagram post DdwMTTuMNnE](https://www.instagram.com/p/DdwMTTuMNnE/).
+The avatar and post thumbnail are real saved images. Kitty displays them with
+its graphics protocol; a text-only terminal recording cannot show those pixels.
 
-Every profile, counter, caption and image in `--demo` is synthetic. The original
-SVG illustrations are in `examples/demo-art/`; their PNG versions are embedded
-under `internal/snapshot/demo/assets/`. No capture, Instagram session, backend,
-or real saved profile is needed to reproduce the demo.
+The demo contains **one creator and one selected post**, not a complete feed.
+Its counts are static observations from **30 September 2026 at 11:54:31 UTC**.
+See [source and attribution](ATTRIBUTION.md#source-and-observation-time) for the
+exact timestamp, acquisition method and bundled JSON.
+Missing metrics remain unknown, and opening the demo does not collect new data.
+No Instagram login, capture, backend, or API key is needed to view it. Live
+collection separately requires a working mobile API session as explained in
+[the README](../README.md#2-prepare-your-own-session-capture).
 
-## Open the demo
+## Open the saved snapshot
 
 Install [Kitty](https://sw.kovidgoyal.net/kitty/binary/). In a Kitty window, from
 the repository root:
@@ -19,25 +25,32 @@ go build -o bin/instagram-scraper ./cmd/instagram-scraper
 ./bin/instagram-scraper --demo
 ```
 
+To inspect the saved observation timestamp, counts and source post URL:
+
+```sh
+./bin/instagram-scraper --demo --json
+```
+
 Use a window around 1440 × 900 pixels with a readable monospace font. If your
 shell normally sets `NO_COLOR`, temporarily unset it for a color recording.
 The app can still be used without color.
 
 ## Suggested sequence
 
-1. Pause on the saved-profile catalogue.
-2. Press `i` to show a profile picture; press **Enter** to return.
-3. Press `/`, type `lumen`, then press Enter to search. Press Enter again to
-   open that profile.
-4. Press `t` to show its first saved reel thumbnail; press Enter to return.
-5. Press `n`, then `t` to show the next reel thumbnail; press Enter to return.
-6. Press Esc to return to the catalogue. Pause briefly, then press `c` to clear
-   search and `f` twice to show an unmeasured profile.
-7. Stop the recording before closing the demo with `q`.
+1. Pause on the saved `@circletoonsig` profile so its identity and observation
+   time are readable.
+2. Press `i` to show the real avatar. Press **Enter or Esc** to return.
+3. Press **Enter** to open the profile and inspect the selected post's saved
+   counters. Keep unavailable counts visible as unknown.
+4. Press `t` to show the real thumbnail for `DdwMTTuMNnE`. Press **Enter or Esc**
+   to return to the post details.
+5. Press **Esc** to return to the profile list. Pause briefly, then stop the
+   recording before closing the viewer with `q`.
 
-Image previews close with **Enter or Esc**, not arbitrary keys. When automating
-Kitty, use its `send-key` command for these keys so the enhanced keyboard
-protocol is encoded correctly. Avoid sending a raw carriage return as text.
+There is no second creator or post in this bundled walkthrough. Image previews
+close with **Enter or Esc**, not arbitrary keys. When automating Kitty, use its
+`send-key` command for these keys so the enhanced keyboard protocol is encoded
+correctly. Avoid sending a raw carriage return as text.
 
 ## Capture the actual window
 
@@ -52,9 +65,10 @@ wf-recorder -g "$(slurp)" -f demo-native.mp4
 Select the Kitty window's rectangle when prompted and stop with Ctrl+C in the
 recorder terminal. Use a dedicated workspace so notifications and unrelated
 windows cannot enter the recording. Do not enable microphone or system audio.
+Record the actual application window so the avatar and thumbnail are captured
+as Kitty rendered them.
 
-The checked-in recording uses native Wayland capture, not a reconstructed
-terminal animation. The README assets are:
+The README assets are:
 
 - `docs/demo.mp4`: native video.
 - `docs/demo.gif`: animated README preview.
@@ -72,5 +86,9 @@ ffmpeg -ss 1 -i docs/demo.mp4 -frames:v 1 docs/demo.png
 ```
 
 Inspect the profile, avatar and thumbnail frames before replacing the README
-assets. Preserve the visible **SYNTHETIC DEMO** label, and never substitute real
-session material or private results in a public recording.
+assets. Keep the saved-snapshot label and observation time readable. Do not
+include session headers, cookies, capture files or private profiles in a public
+recording. Credit the source in [the attribution note](ATTRIBUTION.md).
+
+Synthetic fixtures remain useful for automated tests; the public showcase uses
+the saved real profile and selected post described above.

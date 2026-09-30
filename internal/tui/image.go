@@ -137,7 +137,7 @@ func (c *imageCommand) arguments(filename string, id uint32) []string {
 func (c *imageCommand) frame() string {
 	label := "LOCAL CACHED IMAGE · OFFLINE"
 	if c.demo {
-		label = "SYNTHETIC DEMO · OFFLINE"
+		label = "REAL DATA · SAVED SNAPSHOT · OFFLINE"
 	}
 	return "\x1b[?1049h\x1b[2J\x1b[H\n  " + strongStyle.Render(clipped(c.title, max(1, c.width-4))) +
 		"\n  " + accentStyle.Render(label) + "\n  " + dimStyle.Render("Press Enter or Esc to return to saved metrics.")

@@ -85,7 +85,7 @@ func TestSnapshotLoadKeepsLocalAssetBase(t *testing.T) {
 	}
 }
 
-func TestEverySyntheticDemoImageLoadsFromEmbeddedAssets(t *testing.T) {
+func TestEverySavedDemoImageLoadsFromEmbeddedAssets(t *testing.T) {
 	items, err := Demo()
 	if err != nil {
 		t.Fatal(err)

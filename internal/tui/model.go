@@ -28,7 +28,7 @@ type Model struct {
 	previewGeneration                     uint64
 }
 
-// New prepares the local catalog. demo labels every screen as synthetic data.
+// New prepares the local catalog. demo labels every screen as a recorded real-data snapshot.
 func New(items []snapshot.Snapshot, demo bool) *Model {
 	input := textinput.New()
 	input.Prompt = "/ "
